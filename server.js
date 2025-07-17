@@ -5,6 +5,7 @@ const path = require('path');
 const fs = require('fs-extra');
 const { v4: uuidv4 } = require('uuid');
 const archiver = require('archiver');
+const { spawn } = require('child_process');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -51,6 +52,12 @@ app.post('/api/generate-app', upload.fields([
     // Copy template
     const templateDir = path.join(__dirname, 'templates', 'ionic-webview-template');
     await fs.copy(templateDir, appDir);
+
+    // Copy the README for generated apps
+    const readmePath = path.join(templateDir, 'GENERATED_APP_README.md');
+    if (await fs.pathExists(readmePath)) {
+      await fs.copy(readmePath, path.join(appDir, 'README.md'));
+    }
     
     // Update app configuration
     await updateAppConfig(appDir, {
@@ -60,15 +67,21 @@ app.post('/api/generate-app', upload.fields([
       logo: req.files?.logo?.[0],
       splash: req.files?.splash?.[0]
     });
-    
+
+    // Build and sync the app to ensure it's ready for use
+    try {
+      await buildAndSyncApp(appDir);
+      console.log('App built and synced successfully!');
+    } catch (buildError) {
+      console.warn('Build/sync failed, but app was generated. User will need to run build manually:', buildError.message);
+    }
+
     res.json({
       success: true,
       appId,
       message: 'App generated successfully!',
       downloadUrl: `/api/download/${appId}`
-    });
-    
-  } catch (error) {
+    });  } catch (error) {
     console.error('Error generating app:', error);
     res.status(500).json({
       success: false,
@@ -158,6 +171,63 @@ async function updateAppConfig(appDir, config) {
     await fs.ensureDir(splashDir);
     await fs.copy(splash.path, path.join(splashDir, 'splash.png'));
   }
+}
+
+// Build and sync Capacitor app
+async function buildAndSyncApp(appDir) {
+  return new Promise((resolve, reject) => {
+    console.log('Building and syncing Capacitor app...');
+    
+    // First install dependencies
+    console.log('Installing dependencies...');
+    const npmInstall = spawn('npm', ['install'], { 
+      cwd: appDir,
+      shell: true,
+      stdio: 'pipe'
+    });
+    
+    npmInstall.on('close', (code) => {
+      if (code !== 0) {
+        console.error('npm install failed with code:', code);
+        return reject(new Error('Failed to install dependencies'));
+      }
+      
+      console.log('Dependencies installed. Building app...');
+      
+      // Then build the app
+      const npmBuild = spawn('npm', ['run', 'build'], { 
+        cwd: appDir,
+        shell: true,
+        stdio: 'pipe'
+      });
+      
+      npmBuild.on('close', (buildCode) => {
+        if (buildCode !== 0) {
+          console.error('npm run build failed with code:', buildCode);
+          return reject(new Error('Failed to build app'));
+        }
+        
+        console.log('App built successfully. Syncing Capacitor...');
+        
+        // Finally sync Capacitor
+        const capSync = spawn('npx', ['cap', 'sync'], { 
+          cwd: appDir,
+          shell: true,
+          stdio: 'pipe'
+        });
+        
+        capSync.on('close', (syncCode) => {
+          if (syncCode !== 0) {
+            console.error('cap sync failed with code:', syncCode);
+            return reject(new Error('Failed to sync Capacitor'));
+          }
+          
+          console.log('Capacitor sync completed successfully!');
+          resolve();
+        });
+      });
+    });
+  });
 }
 
 // Serve frontend
