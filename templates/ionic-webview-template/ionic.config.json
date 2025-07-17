@@ -1,0 +1,7 @@
+{
+  "name": "ionic-webview-template",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
