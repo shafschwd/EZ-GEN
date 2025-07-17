@@ -174,6 +174,9 @@ async function updateAppConfig(appDir, config) {
     await fs.writeFile(appComponentPath, appComponent);
   }
   
+  // Update network security config for Android to allow the user's domain
+  await updateNetworkSecurityConfig(appDir, websiteUrl);
+
   // Copy logo and splash screen to resources directory for @capacitor/assets
   if (logo) {
     const resourcesDir = path.join(appDir, 'resources');
@@ -203,6 +206,58 @@ async function updateAppConfig(appDir, config) {
     } catch (error) {
       console.warn('Failed to delete uploaded splash file:', error.message);
     }
+  }
+}
+
+// Update network security config to allow HTTP traffic for the user's domain
+async function updateNetworkSecurityConfig(appDir, websiteUrl) {
+  try {
+    // Extract domain from URL
+    const urlObj = new URL(websiteUrl);
+    const domain = urlObj.hostname;
+    
+    console.log(`Configuring network security for domain: ${domain}`);
+    
+    const networkSecurityPath = path.join(appDir, 'android', 'app', 'src', 'main', 'res', 'xml', 'network_security_config.xml');
+    
+    if (await fs.pathExists(networkSecurityPath)) {
+      let networkConfig = await fs.readFile(networkSecurityPath, 'utf8');
+      
+      // Check if domain is already configured
+      if (!networkConfig.includes(`<domain includeSubdomains="true">${domain}</domain>`)) {
+        // Add the domain to the existing cleartextTrafficPermitted section
+        const domainEntry = `        <domain includeSubdomains="true">${domain}</domain>`;
+        
+        if (networkConfig.includes('<domain-config cleartextTrafficPermitted="true">')) {
+          // Insert after the opening domain-config tag
+          networkConfig = networkConfig.replace(
+            /(<domain-config cleartextTrafficPermitted="true">\s*)/,
+            `$1${domainEntry}\n`
+          );
+        } else {
+          // Create a new domain-config section
+          const newDomainConfig = `
+    <domain-config cleartextTrafficPermitted="true">
+        ${domainEntry}
+    </domain-config>`;
+          
+          networkConfig = networkConfig.replace(
+            '</network-security-config>',
+            `${newDomainConfig}
+</network-security-config>`
+          );
+        }
+        
+        await fs.writeFile(networkSecurityPath, networkConfig);
+        console.log(`Added ${domain} to network security config`);
+      } else {
+        console.log(`Domain ${domain} already configured in network security config`);
+      }
+    } else {
+      console.log('Network security config not found, will be created during sync');
+    }
+  } catch (error) {
+    console.warn('Failed to update network security config:', error.message);
   }
 }
 

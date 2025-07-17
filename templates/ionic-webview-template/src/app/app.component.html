@@ -1,7 +1,40 @@
 <ion-app>
-  <ion-content>
-    <iframe [src]="safeUrl" 
-            style="width: 100%; height: 100%; border: none; position: absolute; top: 0; left: 0;">
+  <ion-content class="full-height">
+    <!-- Error state with controls -->
+    <div *ngIf="loadingError" class="error-container">
+      <ion-text color="medium">
+        <h2>Website Loading Issue</h2>
+        <p>The website might not be accessible in the mobile app due to security restrictions.</p>
+      </ion-text>
+      
+      <ion-button expand="block" (click)="openInExternalBrowser()" class="action-button">
+        <ion-icon name="globe" slot="start"></ion-icon>
+        Open in Browser
+      </ion-button>
+      
+      <ion-button expand="block" fill="outline" (click)="reloadWebsite()" class="action-button">
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        Try Again
+      </ion-button>
+    </div>
+
+    <!-- Main iframe for the website -->
+    <iframe 
+      *ngIf="!loadingError"
+      [src]="safeUrl" 
+      class="main-iframe"
+      (load)="onIframeLoad()"
+      (error)="onIframeError()"
+      sandbox="allow-same-origin allow-scripts allow-forms allow-navigation allow-popups allow-top-navigation">
     </iframe>
+
+    <!-- Floating action button for external browser -->
+    <ion-button 
+      *ngIf="!loadingError && isNative" 
+      class="floating-button"
+      shape="round"
+      (click)="openInExternalBrowser()">
+      <ion-icon name="globe"></ion-icon>
+    </ion-button>
   </ion-content>
 </ion-app>
