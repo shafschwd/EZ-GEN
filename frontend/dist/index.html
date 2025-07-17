@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EZ-GEN - App Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .form-container {
+            padding: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        .file-input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .file-input {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: border-color 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .file-input:hover {
+            border-color: #3b82f6;
+        }
+        
+        .file-input input {
+            display: none;
+        }
+        
+        .generate-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .generate-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result.success {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+            color: #065f46;
+        }
+        
+        .result.error {
+            background: #fee2e2;
+            border: 1px solid #ef4444;
+            color: #991b1b;
+        }
+        
+        .download-btn {
+            background: #3b82f6;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            margin-top: 10px;
+            display: inline-block;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .feature {
+            text-align: center;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 EZ-GEN</h1>
+            <p>Generate Native Mobile Apps from Your Website</p>
+        </div>
+        
+        <div class="form-container">
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">📱</div>
+                    <h3>Cross-Platform</h3>
+                    <p>Android & iOS ready</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Fast Generation</h3>
+                    <p>Apps ready in minutes</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Customizable</h3>
+                    <p>Your branding & assets</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📦</div>
+                    <h3>Store Ready</h3>
+                    <p>APK/IPA for submission</p>
+                </div>
+            </div>
+            
+            <form id="appForm">
+                <div class="form-group">
+                    <label for="appName">App Name *</label>
+                    <input type="text" id="appName" name="appName" required placeholder="My Awesome App">
+                </div>
+                
+                <div class="form-group">
+                    <label for="websiteUrl">Website URL *</label>
+                    <input type="url" id="websiteUrl" name="websiteUrl" required placeholder="https://your-website.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="packageName">Package Name *</label>
+                    <input type="text" id="packageName" name="packageName" required placeholder="com.yourcompany.appname">
+                </div>
+                
+                <div class="file-input-group">
+                    <div class="file-input" onclick="document.getElementById('logo').click()">
+                        <div>📷</div>
+                        <div>Upload Logo</div>
+                        <div style="font-size: 0.8em; color: #666; margin-top: 5px;">512x512 PNG recommended</div>
+                        <input type="file" id="logo" name="logo" accept="image/*">
+                    </div>
+                    
+                    <div class="file-input" onclick="document.getElementById('splash').click()">
+                        <div>🖼️</div>
+                        <div>Upload Splash Screen</div>
+                        <div style="font-size: 0.8em; color: #666; margin-top: 5px;">1080x1920 PNG recommended</div>
+                        <input type="file" id="splash" name="splash" accept="image/*">
+                    </div>
+                </div>
+                
+                <button type="submit" class="generate-btn" id="generateBtn">
+                    Generate Mobile App
+                </button>
+            </form>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Generating your mobile app...</p>
+            </div>
+            
+            <div class="result" id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('appForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('appName', document.getElementById('appName').value);
+            formData.append('websiteUrl', document.getElementById('websiteUrl').value);
+            formData.append('packageName', document.getElementById('packageName').value);
+            
+            const logo = document.getElementById('logo').files[0];
+            const splash = document.getElementById('splash').files[0];
+            
+            if (logo) formData.append('logo', logo);
+            if (splash) formData.append('splash', splash);
+            
+            // Show loading
+            document.getElementById('generateBtn').disabled = true;
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/generate-app', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('generateBtn').disabled = false;
+                
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <h3>✅ App Generated Successfully!</h3>
+                        <p>${result.message}</p>
+                        <a href="${result.downloadUrl}" class="download-btn" download>
+                            📥 Download App Package
+                        </a>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        <h3>❌ Generation Failed</h3>
+                        <p>${result.message}</p>
+                    `;
+                }
+            } catch (error) {
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('generateBtn').disabled = false;
+                
+                const resultDiv = document.getElementById('result');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h3>❌ Network Error</h3>
+                    <p>Failed to connect to the server. Please try again.</p>
+                `;
+            }
+        });
+        
+        // File input feedback
+        document.getElementById('logo').addEventListener('change', function(e) {
+            const parent = e.target.closest('.file-input');
+            if (e.target.files[0]) {
+                parent.style.borderColor = '#10b981';
+                parent.querySelector('div:nth-child(2)').textContent = '✓ Logo Selected';
+            }
+        });
+        
+        document.getElementById('splash').addEventListener('change', function(e) {
+            const parent = e.target.closest('.file-input');
+            if (e.target.files[0]) {
+                parent.style.borderColor = '#10b981';
+                parent.querySelector('div:nth-child(2)').textContent = '✓ Splash Selected';
+            }
+        });
+    </script>
+</body>
+</html>
