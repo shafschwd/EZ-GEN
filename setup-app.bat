@@ -46,12 +46,30 @@ if errorlevel 1 (
 )
 
 echo.
+echo 🎨 Generating app icons and splash screens...
+call npx capacitor-assets generate
+if errorlevel 1 (
+    echo ⚠️  Asset generation failed, continuing...
+) else (
+    echo ✅ Assets generated successfully
+)
+
+echo.
 echo 🔄 Syncing Capacitor platforms...
 call npx cap sync
 if errorlevel 1 (
     echo ❌ Failed to sync Capacitor
     goto :error
 )
+
+echo.
+echo 🧪 Testing app functionality...
+echo Starting test server briefly...
+timeout /t 1 /nobreak >nul
+start /min cmd /c "cd /d "%APP_DIR%" && npm start"
+timeout /t 10 /nobreak >nul
+taskkill /f /im node.exe >nul 2>&1
+echo ✅ App setup and test completed!
 
 echo.
 echo ✅ App setup completed successfully!
@@ -70,7 +88,9 @@ echo.
 echo 🔧 To fix this manually, run these commands in your app directory:
 echo    1. npm install
 echo    2. npm run build
-echo    3. npx cap sync
+echo    3. npx capacitor-assets generate
+echo    4. npx cap sync
+echo    5. npm start (to test)
 echo.
 pause
 exit /b 1

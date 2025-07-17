@@ -16,7 +16,12 @@ npm install
 npm run build
 ```
 
-### 3. Sync Capacitor Platforms
+### 3. Generate App Icons and Splash Screens
+```bash
+npx capacitor-assets generate
+```
+
+### 4. Sync Capacitor Platforms
 ```bash
 npx cap sync
 ```
@@ -37,8 +42,17 @@ npx cap open ios
 
 - **Start dev server**: `npm start`
 - **Build for production**: `npm run build`
+- **Generate assets**: `npx capacitor-assets generate`
 - **Sync platforms**: `npx cap sync`
 - **Add platform**: `npx cap add android` or `npx cap add ios`
+
+## 🎨 Custom Assets
+
+Your app includes custom logo and splash screen assets in the `resources/` directory:
+- `resources/icon.png` - App icon (should be 1024x1024px)
+- `resources/splash.png` - Splash screen (should be 2732x2732px)
+
+These are automatically processed by @capacitor/assets to generate all required sizes for iOS and Android.
 
 ## ❗ Common Issues
 

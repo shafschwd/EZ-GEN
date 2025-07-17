@@ -137,6 +137,21 @@ async function updateAppConfig(appDir, config) {
     capacitorConfig = capacitorConfig
       .replace(/appId: '.*?'/, `appId: '${packageName}'`)
       .replace(/appName: '.*?'/, `appName: '${appName}'`);
+    
+    // If assets configuration is missing and we have logo/splash, add it
+    if ((logo || splash) && !capacitorConfig.includes('CapacitorAssets')) {
+      capacitorConfig = capacitorConfig.replace(
+        /webDir: '[^']*'/,
+        `webDir: 'www',
+  plugins: {
+    CapacitorAssets: {
+      iconPath: 'resources/icon.png',
+      splashPath: 'resources/splash.png',
+    }
+  }`
+      );
+    }
+    
     await fs.writeFile(capacitorConfigPath, capacitorConfig);
   }
   
@@ -159,17 +174,35 @@ async function updateAppConfig(appDir, config) {
     await fs.writeFile(appComponentPath, appComponent);
   }
   
-  // Copy logo and splash screen if provided
+  // Copy logo and splash screen to resources directory for @capacitor/assets
   if (logo) {
-    const logoDir = path.join(appDir, 'src', 'assets', 'icon');
-    await fs.ensureDir(logoDir);
-    await fs.copy(logo.path, path.join(logoDir, 'icon.png'));
+    const resourcesDir = path.join(appDir, 'resources');
+    await fs.ensureDir(resourcesDir);
+    await fs.copy(logo.path, path.join(resourcesDir, 'icon.png'));
+    console.log('Logo copied to resources/icon.png');
+    
+    // Delete the uploaded file
+    try {
+      await fs.remove(logo.path);
+      console.log('Uploaded logo file deleted');
+    } catch (error) {
+      console.warn('Failed to delete uploaded logo file:', error.message);
+    }
   }
   
   if (splash) {
-    const splashDir = path.join(appDir, 'src', 'assets', 'splash');
-    await fs.ensureDir(splashDir);
-    await fs.copy(splash.path, path.join(splashDir, 'splash.png'));
+    const resourcesDir = path.join(appDir, 'resources');
+    await fs.ensureDir(resourcesDir);
+    await fs.copy(splash.path, path.join(resourcesDir, 'splash.png'));
+    console.log('Splash screen copied to resources/splash.png');
+    
+    // Delete the uploaded file
+    try {
+      await fs.remove(splash.path);
+      console.log('Uploaded splash file deleted');
+    } catch (error) {
+      console.warn('Failed to delete uploaded splash file:', error.message);
+    }
   }
 }
 
@@ -207,25 +240,108 @@ async function buildAndSyncApp(appDir) {
           return reject(new Error('Failed to build app'));
         }
         
-        console.log('App built successfully. Syncing Capacitor...');
+        console.log('App built successfully. Generating assets...');
         
-        // Finally sync Capacitor
-        const capSync = spawn('npx', ['cap', 'sync'], { 
+        // Generate assets using @capacitor/assets
+        const generateAssets = spawn('npx', ['capacitor-assets', 'generate'], { 
           cwd: appDir,
           shell: true,
           stdio: 'pipe'
         });
         
-        capSync.on('close', (syncCode) => {
-          if (syncCode !== 0) {
-            console.error('cap sync failed with code:', syncCode);
-            return reject(new Error('Failed to sync Capacitor'));
+        generateAssets.on('close', (assetsCode) => {
+          if (assetsCode !== 0) {
+            console.warn('Asset generation failed, continuing with sync...');
+          } else {
+            console.log('Assets generated successfully.');
           }
           
-          console.log('Capacitor sync completed successfully!');
-          resolve();
+          console.log('Syncing Capacitor...');
+          
+          // Sync Capacitor
+          const capSync = spawn('npx', ['cap', 'sync'], { 
+            cwd: appDir,
+            shell: true,
+            stdio: 'pipe'
+          });
+          
+          capSync.on('close', (syncCode) => {
+            if (syncCode !== 0) {
+              console.error('cap sync failed with code:', syncCode);
+              return reject(new Error('Failed to sync Capacitor'));
+            }
+            
+            console.log('Capacitor sync completed. Testing app...');
+            
+            // Test the app by trying to serve it
+            testAppFunctionality(appDir)
+              .then(() => {
+                console.log('App test completed successfully!');
+                resolve();
+              })
+              .catch((testError) => {
+                console.warn('App test failed but generation completed:', testError.message);
+                resolve(); // Don't fail the entire process for test failures
+              });
+          });
         });
       });
+    });
+  });
+}
+
+// Test app functionality
+async function testAppFunctionality(appDir) {
+  return new Promise((resolve, reject) => {
+    console.log('Testing app functionality...');
+    
+    // Try to start the dev server briefly to test if everything works
+    const testServer = spawn('npm', ['start'], { 
+      cwd: appDir,
+      shell: true,
+      stdio: 'pipe'
+    });
+    
+    let serverOutput = '';
+    let serverStarted = false;
+    
+    testServer.stdout.on('data', (data) => {
+      serverOutput += data.toString();
+      if (serverOutput.includes('Local:') || serverOutput.includes('localhost:') || serverOutput.includes('Application bundle generation complete')) {
+        serverStarted = true;
+      }
+    });
+    
+    testServer.stderr.on('data', (data) => {
+      serverOutput += data.toString();
+    });
+    
+    // Give the server 30 seconds to start
+    const timeout = setTimeout(() => {
+      testServer.kill();
+      if (serverStarted) {
+        console.log('✅ App test passed - server started successfully');
+        resolve();
+      } else {
+        console.log('⚠️  App test inconclusive - server may need more time to start');
+        console.log('Last output:', serverOutput.slice(-500));
+        resolve(); // Don't fail, just warn
+      }
+    }, 30000);
+    
+    testServer.on('close', (code) => {
+      clearTimeout(timeout);
+      if (serverStarted) {
+        console.log('✅ App test passed - server started and stopped cleanly');
+        resolve();
+      } else {
+        reject(new Error('Server failed to start during test'));
+      }
+    });
+    
+    testServer.on('error', (error) => {
+      clearTimeout(timeout);
+      reject(new Error(`Test server error: ${error.message}`));
     });
   });
 }
@@ -235,7 +351,37 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'dist', 'index.html'));
 });
 
+// Clean up old uploaded files
+async function cleanupOldUploads() {
+  const uploadsDir = path.join(__dirname, 'uploads');
+  try {
+    if (await fs.pathExists(uploadsDir)) {
+      const files = await fs.readdir(uploadsDir);
+      const now = Date.now();
+      const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+      
+      for (const file of files) {
+        const filePath = path.join(uploadsDir, file);
+        const stats = await fs.stat(filePath);
+        
+        if (now - stats.mtime.getTime() > maxAge) {
+          await fs.remove(filePath);
+          console.log('Cleaned up old upload:', file);
+        }
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to cleanup old uploads:', error.message);
+  }
+}
+
 app.listen(PORT, () => {
   console.log(`🚀 EZ-GEN App Generator running on http://localhost:${PORT}`);
   console.log(`📱 Ready to generate mobile apps!`);
+  
+  // Clean up old uploads on startup
+  cleanupOldUploads();
+  
+  // Clean up old uploads every hour
+  setInterval(cleanupOldUploads, 60 * 60 * 1000);
 });

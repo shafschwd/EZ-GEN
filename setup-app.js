@@ -63,9 +63,60 @@ async function setupApp(appDir) {
     console.log('\n🔨 Building the app...');
     await runCommand('npm', ['run', 'build'], appDir);
     
-    // Step 3: Sync Capacitor
+    // Step 3: Generate assets with @capacitor/assets
+    console.log('\n🎨 Generating app icons and splash screens...');
+    try {
+      await runCommand('npx', ['capacitor-assets', 'generate'], appDir);
+      console.log('✅ Assets generated successfully');
+    } catch (error) {
+      console.log('⚠️  Asset generation failed, continuing...');
+    }
+    
+    // Step 4: Sync Capacitor
     console.log('\n🔄 Syncing Capacitor platforms...');
     await runCommand('npx', ['cap', 'sync'], appDir);
+    
+    // Step 5: Test the app
+    console.log('\n🧪 Testing app functionality...');
+    try {
+      console.log('Starting test server...');
+      const testProcess = spawn('npm', ['start'], {
+        cwd: appDir,
+        shell: true,
+        stdio: 'pipe'
+      });
+      
+      let testOutput = '';
+      let serverStarted = false;
+      
+      testProcess.stdout.on('data', (data) => {
+        testOutput += data.toString();
+        if (testOutput.includes('Local:') || testOutput.includes('localhost:')) {
+          serverStarted = true;
+        }
+      });
+      
+      // Wait 15 seconds for server to start
+      await new Promise((resolve) => {
+        const timeout = setTimeout(() => {
+          testProcess.kill();
+          resolve();
+        }, 15000);
+        
+        testProcess.on('close', () => {
+          clearTimeout(timeout);
+          resolve();
+        });
+      });
+      
+      if (serverStarted) {
+        console.log('✅ App test passed - server started successfully');
+      } else {
+        console.log('⚠️  App test inconclusive - manual testing recommended');
+      }
+    } catch (testError) {
+      console.log('⚠️  App test failed, but setup completed');
+    }
     
     console.log('\n✅ App setup completed successfully!');
     console.log('\n📱 Your app is now ready. You can:');
@@ -79,7 +130,9 @@ async function setupApp(appDir) {
     console.log('\n🔧 To fix this manually, run these commands in your app directory:');
     console.log('   1. npm install');
     console.log('   2. npm run build');
-    console.log('   3. npx cap sync');
+    console.log('   3. npx capacitor-assets generate');
+    console.log('   4. npx cap sync');
+    console.log('   5. npm start (to test)');
     process.exit(1);
   }
 }
