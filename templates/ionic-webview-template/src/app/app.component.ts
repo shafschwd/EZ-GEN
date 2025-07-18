@@ -57,14 +57,8 @@ export class AppComponent implements OnInit {
   }
 
   async checkUrlAccessibility() {
-    try {
-      // Test if the URL is accessible
-      const response = await fetch(this.websiteUrl, { method: 'HEAD', mode: 'no-cors' });
-      console.log('URL accessibility check completed');
-    } catch (error) {
-      console.warn('URL may not be accessible in webview:', error);
-      this.loadingError = true;
-    }
+    // Don't perform accessibility check for web platform iframe
+    // The iframe will handle errors automatically
   }
 
   async openInExternalBrowser() {
@@ -89,20 +83,30 @@ export class AppComponent implements OnInit {
 
   async reloadWebsite() {
     this.loadingError = false;
-    const iframe = document.querySelector('iframe');
-    if (iframe) {
-      iframe.src = iframe.src; // Reload iframe
+    this.isLoading = true;
+    this.showContent = false;
+    
+    if (this.isNative) {
+      await this.loadInNativeWebView();
+    } else {
+      const iframe = document.querySelector('iframe');
+      if (iframe) {
+        iframe.src = iframe.src; // Reload iframe
+      }
+      this.showContent = true;
     }
   }
 
   onIframeError() {
     console.error('Iframe failed to load website');
     this.loadingError = true;
+    this.isLoading = false;
   }
 
   onIframeLoad() {
     console.log('Iframe loaded successfully');
     this.loadingError = false;
+    this.isLoading = false;
     // Add loaded class for smooth transition
     const iframe = document.querySelector('iframe');
     if (iframe) {

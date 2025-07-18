@@ -162,6 +162,36 @@ async function updateAppConfig(appDir, config) {
     packageJson.name = appName.toLowerCase().replace(/[^a-z0-9]/g, '-');
     await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 });
   }
+
+  // Update ionic.config.json
+  const ionicConfigPath = path.join(appDir, 'ionic.config.json');
+  if (await fs.pathExists(ionicConfigPath)) {
+    const ionicConfig = await fs.readJson(ionicConfigPath);
+    ionicConfig.name = appName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    await fs.writeJson(ionicConfigPath, ionicConfig, { spaces: 2 });
+  }
+
+  // Update index.html title
+  const indexHtmlPath = path.join(appDir, 'src', 'index.html');
+  if (await fs.pathExists(indexHtmlPath)) {
+    let indexHtml = await fs.readFile(indexHtmlPath, 'utf8');
+    indexHtml = indexHtml.replace(
+      /<title>.*?<\/title>/,
+      `<title>${appName}</title>`
+    );
+    await fs.writeFile(indexHtmlPath, indexHtml);
+  }
+
+  // Update Android strings.xml for app display name
+  const androidStringsPath = path.join(appDir, 'android', 'app', 'src', 'main', 'res', 'values', 'strings.xml');
+  if (await fs.pathExists(androidStringsPath)) {
+    let stringsXml = await fs.readFile(androidStringsPath, 'utf8');
+    stringsXml = stringsXml
+      .replace(/<string name="app_name">.*?<\/string>/, `<string name="app_name">${appName}</string>`)
+      .replace(/<string name="title_activity_main">.*?<\/string>/, `<string name="title_activity_main">${appName}</string>`)
+      .replace(/\{\{APP_NAME\}\}/g, appName); // Handle placeholder format
+    await fs.writeFile(androidStringsPath, stringsXml);
+  }
   
   // Update app component to load website URL
   const appComponentPath = path.join(appDir, 'src', 'app', 'app.component.ts');
