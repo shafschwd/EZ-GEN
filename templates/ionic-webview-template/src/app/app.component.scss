@@ -4,6 +4,45 @@ ion-content.full-height {
   --padding-start: 0;
   --padding-end: 0;
   height: 100vh;
+  overflow: hidden;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  z-index: 1000;
+  
+  .loading-content {
+    text-align: center;
+    color: white;
+    
+    ion-spinner {
+      margin-bottom: 24px;
+      --color: white;
+      transform: scale(1.5);
+    }
+    
+    h2 {
+      font-size: 1.8rem;
+      margin: 0 0 12px 0;
+      font-weight: 600;
+      color: white;
+    }
+    
+    p {
+      color: rgba(255, 255, 255, 0.8);
+      margin: 0;
+      font-size: 1.1rem;
+    }
+  }
 }
 
 .main-iframe {
@@ -14,6 +53,23 @@ ion-content.full-height {
   top: 0;
   left: 0;
   background: white;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  
+  // Force full viewport scaling
+  transform: scale(1);
+  transform-origin: 0 0;
+  
+  &.loaded {
+    opacity: 1;
+  }
+}
+
+// Override any iframe restrictions for better mobile display
+iframe {
+  // Ensure the iframe content scales properly on mobile
+  min-width: 100%;
+  min-height: 100vh;
 }
 
 .error-container {
@@ -40,6 +96,13 @@ ion-content.full-height {
   margin-bottom: 16px;
   width: 100%;
   max-width: 300px;
+  --border-radius: 12px;
+  
+  &:first-of-type {
+    --background: var(--ion-color-primary);
+    --color: white;
+    font-weight: 600;
+  }
 }
 
 .floating-button {
