@@ -189,8 +189,51 @@ async function updateAppConfig(appDir, config) {
     stringsXml = stringsXml
       .replace(/<string name="app_name">.*?<\/string>/, `<string name="app_name">${appName}</string>`)
       .replace(/<string name="title_activity_main">.*?<\/string>/, `<string name="title_activity_main">${appName}</string>`)
-      .replace(/\{\{APP_NAME\}\}/g, appName); // Handle placeholder format
+      .replace(/<string name="package_name">.*?<\/string>/, `<string name="package_name">${packageName}</string>`)
+      .replace(/<string name="custom_url_scheme">.*?<\/string>/, `<string name="custom_url_scheme">${packageName}</string>`)
+      .replace(/\{\{APP_NAME\}\}/g, appName) // Handle placeholder format
+      .replace(/\{\{PACKAGE_NAME\}\}/g, packageName); // Handle package name placeholder
     await fs.writeFile(androidStringsPath, stringsXml);
+  }
+
+  // Update Android build.gradle for package name
+  const androidBuildGradlePath = path.join(appDir, 'android', 'app', 'build.gradle');
+  if (await fs.pathExists(androidBuildGradlePath)) {
+    let buildGradle = await fs.readFile(androidBuildGradlePath, 'utf8');
+    buildGradle = buildGradle
+      .replace(/namespace ".*?"/, `namespace "${packageName}"`)
+      .replace(/applicationId ".*?"/, `applicationId "${packageName}"`)
+      .replace(/\{\{PACKAGE_NAME\}\}/g, packageName); // Handle placeholder format
+    await fs.writeFile(androidBuildGradlePath, buildGradle);
+  }
+
+  // Update MainActivity package structure
+  const oldMainActivityPath = path.join(appDir, 'android', 'app', 'src', 'main', 'java', 'io', 'ionic', 'starter', 'MainActivity.java');
+  const packageParts = packageName.split('.');
+  const newJavaDir = path.join(appDir, 'android', 'app', 'src', 'main', 'java', ...packageParts);
+  const newMainActivityPath = path.join(newJavaDir, 'MainActivity.java');
+  
+  // Ensure new package directory exists
+  await fs.ensureDir(newJavaDir);
+  
+  // Read MainActivity content (either from old location or template)
+  let mainActivityContent = '';
+  if (await fs.pathExists(oldMainActivityPath)) {
+    mainActivityContent = await fs.readFile(oldMainActivityPath, 'utf8');
+    // Remove old MainActivity
+    await fs.remove(oldMainActivityPath);
+  } else {
+    // Read from template
+    const templateMainActivityPath = path.join(__dirname, 'templates', 'ionic-webview-template', 'android', 'app', 'src', 'main', 'java', 'io', 'ionic', 'starter', 'MainActivity.java');
+    if (await fs.pathExists(templateMainActivityPath)) {
+      mainActivityContent = await fs.readFile(templateMainActivityPath, 'utf8');
+    }
+  }
+  
+  // Update package declaration
+  if (mainActivityContent) {
+    mainActivityContent = mainActivityContent.replace(/package .*?;/, `package ${packageName};`);
+    await fs.writeFile(newMainActivityPath, mainActivityContent);
   }
   
   // Update app component to load website URL
