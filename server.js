@@ -405,11 +405,33 @@ async function buildAndSyncApp(appDir) {
             testAppFunctionality(appDir)
               .then(() => {
                 console.log('App test completed successfully!');
-                resolve();
+                
+                // Generate APK as the final step
+                console.log('Starting APK generation as final step...');
+                generateApk(appDir)
+                  .then(() => {
+                    console.log('APK generation completed successfully!');
+                    resolve();
+                  })
+                  .catch((apkError) => {
+                    console.warn('APK generation failed, but app was generated successfully:', apkError.message);
+                    resolve(); // Don't fail the entire process for APK generation failures
+                  });
               })
               .catch((testError) => {
                 console.warn('App test failed but generation completed:', testError.message);
-                resolve(); // Don't fail the entire process for test failures
+                
+                // Still try to generate APK even if test failed
+                console.log('Attempting APK generation despite test failure...');
+                generateApk(appDir)
+                  .then(() => {
+                    console.log('APK generation completed successfully!');
+                    resolve();
+                  })
+                  .catch((apkError) => {
+                    console.warn('APK generation failed, but app was generated successfully:', apkError.message);
+                    resolve();
+                  });
               });
           });
         });
@@ -470,6 +492,97 @@ async function testAppFunctionality(appDir) {
     testServer.on('error', (error) => {
       clearTimeout(timeout);
       reject(new Error(`Test server error: ${error.message}`));
+    });
+  });
+}
+
+// Generate APK for Android
+async function generateApk(appDir) {
+  return new Promise((resolve, reject) => {
+    console.log('🔨 Starting APK generation process...');
+    
+    // Check if Android platform exists
+    const androidDir = path.join(appDir, 'android');
+    if (!fs.existsSync(androidDir)) {
+      console.log('⚠️  Android platform not found, skipping APK generation');
+      console.log('💡 You can add Android platform with: npx cap add android');
+      return resolve();
+    }
+    
+    console.log('📱 Android platform found, proceeding with APK build...');
+    
+    // Check for gradlew
+    const gradlewPath = path.join(androidDir, process.platform === 'win32' ? 'gradlew.bat' : 'gradlew');
+    if (!fs.existsSync(gradlewPath)) {
+      console.log('⚠️  Gradle wrapper not found, skipping APK generation');
+      console.log('💡 You can manually build APK with: cd android && ./gradlew assembleDebug');
+      return resolve();
+    }
+    
+    console.log('⚙️  Building APK with Gradle wrapper...');
+    const gradlewCmd = process.platform === 'win32' ? 'gradlew.bat' : './gradlew';
+    
+    const gradleBuild = spawn(gradlewCmd, ['assembleDebug'], {
+      cwd: androidDir,
+      shell: true,
+      stdio: 'pipe'
+    });
+    
+    let buildOutput = '';
+    gradleBuild.stdout.on('data', (data) => {
+      buildOutput += data.toString();
+    });
+    
+    gradleBuild.stderr.on('data', (data) => {
+      buildOutput += data.toString();
+    });
+    
+    gradleBuild.on('close', (code) => {
+      if (code !== 0) {
+        console.log('⚠️  Gradle build failed with exit code:', code);
+        console.log('💡 You can manually build APK with: cd android && ./gradlew assembleDebug');
+        console.log('🔍 Build output:', buildOutput.slice(-500)); // Show last 500 chars
+        return reject(new Error(`Gradle build failed with exit code: ${code}`)); // Properly reject on failure
+      }
+      
+      console.log('✅ Gradle build completed successfully!');
+      console.log('🔍 Looking for generated APK...');
+      
+      // Find the generated APK
+      const apkDir = path.join(androidDir, 'app', 'build', 'outputs', 'apk', 'debug');
+      if (fs.existsSync(apkDir)) {
+        const apkFiles = fs.readdirSync(apkDir).filter(f => f.endsWith('.apk'));
+        if (apkFiles.length > 0) {
+          const apkPath = path.join(apkDir, apkFiles[0]);
+          console.log(`🎉 APK generated successfully: ${apkPath}`);
+          
+          // Copy APK to app root for easy access
+          try {
+            const targetApkPath = path.join(appDir, `${path.basename(appDir)}.apk`);
+            fs.copyFileSync(apkPath, targetApkPath);
+            console.log(`📱 APK copied to: ${targetApkPath}`);
+            console.log(`🚀 Ready to install: ${targetApkPath}`);
+          } catch (copyError) {
+            console.log('⚠️  Could not copy APK to app root:', copyError.message);
+            console.log(`📱 APK available at: ${apkPath}`);
+          }
+        } else {
+          console.log('⚠️  No APK files found in build outputs');
+          return reject(new Error('No APK files found in build outputs'));
+        }
+      } else {
+        console.log('⚠️  APK build directory not found:', apkDir);
+        return reject(new Error('APK build directory not found'));
+      }
+      
+      console.log('📱 APK generation process completed successfully!');
+      resolve();
+    });
+    
+    gradleBuild.on('error', (error) => {
+      console.log('⚠️  APK generation failed:', error.message);
+      console.log('💡 You can manually generate APK with: cd android && ./gradlew assembleDebug');
+      reject(new Error(`APK generation failed: ${error.message}`)); // Properly reject on error
     });
   });
 }

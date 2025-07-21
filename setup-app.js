@@ -76,7 +76,62 @@ async function setupApp(appDir) {
     console.log('\n🔄 Syncing Capacitor platforms...');
     await runCommand('npx', ['cap', 'sync'], appDir);
     
-    // Step 5: Test the app
+    // Step 5: Generate APK
+    console.log('\n📦 Generating APK file...');
+    try {
+      // Check if Android platform exists
+      const androidDir = path.join(appDir, 'android');
+      if (fs.existsSync(androidDir)) {
+        console.log('Android platform found, building APK...');
+        
+        // Use gradlew directly for APK generation (more reliable than cap run)
+        const gradlewPath = path.join(androidDir, 'gradlew');
+        const gradlewBatPath = path.join(androidDir, 'gradlew.bat');
+        
+        if (fs.existsSync(gradlewPath) || fs.existsSync(gradlewBatPath)) {
+          console.log('Building APK with Gradle...');
+          const gradlewCmd = process.platform === 'win32' ? 'gradlew.bat' : './gradlew';
+          
+          try {
+            await runCommand(gradlewCmd, ['assembleDebug'], androidDir);
+            
+            // Find the generated APK
+            const apkDir = path.join(androidDir, 'app', 'build', 'outputs', 'apk', 'debug');
+            if (fs.existsSync(apkDir)) {
+              const apkFiles = fs.readdirSync(apkDir).filter(f => f.endsWith('.apk'));
+              if (apkFiles.length > 0) {
+                const apkPath = path.join(apkDir, apkFiles[0]);
+                console.log(`✅ APK generated successfully: ${apkPath}`);
+                
+                // Copy APK to app root for easy access
+                const targetApkPath = path.join(appDir, `${path.basename(appDir)}.apk`);
+                fs.copyFileSync(apkPath, targetApkPath);
+                console.log(`📱 APK copied to: ${targetApkPath}`);
+                console.log(`🎉 Ready to install: ${targetApkPath}`);
+              } else {
+                console.log('⚠️  APK file not found in build outputs');
+              }
+            } else {
+              console.log('⚠️  APK build directory not found');
+            }
+          } catch (gradleError) {
+            console.log('⚠️  Gradle build failed:', gradleError.message);
+            console.log('💡 You can manually build APK with: cd android && ./gradlew assembleDebug');
+          }
+        } else {
+          console.log('⚠️  Gradle wrapper not found, skipping APK generation');
+          console.log('💡 You can manually build APK with: cd android && ./gradlew assembleDebug');
+        }
+      } else {
+        console.log('⚠️  Android platform not found, skipping APK generation');
+        console.log('💡 Make sure to run: npx cap add android');
+      }
+    } catch (apkError) {
+      console.log('⚠️  APK generation failed:', apkError.message);
+      console.log('💡 You can manually generate APK with: cd android && ./gradlew assembleDebug');
+    }
+
+    // Step 6: Test the app
     console.log('\n🧪 Testing app functionality...');
     try {
       console.log('Starting test server...');
@@ -120,10 +175,12 @@ async function setupApp(appDir) {
     
     console.log('\n✅ App setup completed successfully!');
     console.log('\n📱 Your app is now ready. You can:');
+    console.log('   • Install APK: Look for .apk file in the app directory');
     console.log('   • Open in Android Studio: npx cap open android');
     console.log('   • Open in Xcode: npx cap open ios');
     console.log('   • Build for web: npm run build');
     console.log('   • Run dev server: npm start');
+    console.log('   • Generate new APK: cd android && ./gradlew assembleDebug');
     
   } catch (error) {
     console.error('\n❌ Setup failed:', error.message);
@@ -133,6 +190,7 @@ async function setupApp(appDir) {
     console.log('   3. npx capacitor-assets generate');
     console.log('   4. npx cap sync');
     console.log('   5. npm start (to test)');
+    console.log('   6. cd android && ./gradlew assembleDebug (to generate APK)');
     process.exit(1);
   }
 }
