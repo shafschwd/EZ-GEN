@@ -1,12 +1,28 @@
 <ion-app>
-  <ion-content class="full-height">
-    <!-- Loading state for native apps -->
-    <div *ngIf="isLoading && !loadingError" class="loading-overlay">
-      <div class="loading-content">
-        <ion-spinner name="crescent" color="primary"></ion-spinner>
-      </div>
-    </div>
+  <!-- Loading state for native apps - outside ion-content -->
+  <div *ngIf="isLoading && !loadingError" 
+       class="loading-overlay"
+       style="position: fixed !important; 
+              top: 0 !important; 
+              left: 0 !important; 
+              right: 0 !important; 
+              bottom: 0 !important; 
+              width: 100vw !important; 
+              height: 100vh !important; 
+              display: flex !important; 
+              justify-content: center !important; 
+              align-items: center !important; 
+              z-index: 99999 !important; 
+              margin: 0 !important; 
+              padding: 0 !important;">
+    <ion-spinner name="crescent" color="primary" 
+                 style="--color: white !important; 
+                        transform: scale(1.5) !important; 
+                        margin: 0 !important; 
+                        padding: 0 !important;"></ion-spinner>
+  </div>
 
+  <ion-content class="full-height">
     <!-- Error state with controls -->
     <div *ngIf="loadingError" class="error-container">
       <ion-text color="medium">
