@@ -70,7 +70,7 @@ app.post('/api/generate-app', upload.fields([
 
     // Build and sync the app to ensure it's ready for use
     try {
-      await buildAndSyncApp(appDir);
+      await buildAndSyncApp(appDir, appName);
       console.log('App built and synced successfully!');
     } catch (buildError) {
       console.warn('Build/sync failed, but app was generated. User will need to run build manually:', buildError.message);
@@ -335,7 +335,7 @@ async function updateNetworkSecurityConfig(appDir, websiteUrl) {
 }
 
 // Build and sync Capacitor app
-async function buildAndSyncApp(appDir) {
+async function buildAndSyncApp(appDir, appName) {
   return new Promise((resolve, reject) => {
     console.log('Building and syncing Capacitor app...');
     
@@ -408,7 +408,7 @@ async function buildAndSyncApp(appDir) {
                 
                 // Generate APK as the final step
                 console.log('Starting APK generation as final step...');
-                generateApk(appDir)
+                generateApk(appDir, appName)
                   .then(() => {
                     console.log('APK generation completed successfully!');
                     resolve();
@@ -423,7 +423,7 @@ async function buildAndSyncApp(appDir) {
                 
                 // Still try to generate APK even if test failed
                 console.log('Attempting APK generation despite test failure...');
-                generateApk(appDir)
+                generateApk(appDir, appName)
                   .then(() => {
                     console.log('APK generation completed successfully!');
                     resolve();
@@ -497,7 +497,7 @@ async function testAppFunctionality(appDir) {
 }
 
 // Generate APK for Android
-async function generateApk(appDir) {
+async function generateApk(appDir, appName) {
   return new Promise((resolve, reject) => {
     console.log('🔨 Starting APK generation process...');
     
@@ -556,14 +556,27 @@ async function generateApk(appDir) {
           const apkPath = path.join(apkDir, apkFiles[0]);
           console.log(`🎉 APK generated successfully: ${apkPath}`);
           
-          // Copy APK to app root for easy access
+          // Create apks directory in project root
+          const apksDir = path.join(__dirname, 'apks');
+          fs.ensureDirSync(apksDir);
+          
+          // Create clean app name for file (remove special characters)
+          const cleanAppName = appName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+          const finalApkName = `${cleanAppName}.apk`;
+          const finalApkPath = path.join(apksDir, finalApkName);
+          
+          // Copy APK to apks folder with proper name
           try {
-            const targetApkPath = path.join(appDir, `${path.basename(appDir)}.apk`);
-            fs.copyFileSync(apkPath, targetApkPath);
-            console.log(`📱 APK copied to: ${targetApkPath}`);
-            console.log(`🚀 Ready to install: ${targetApkPath}`);
+            fs.copyFileSync(apkPath, finalApkPath);
+            console.log(`📱 APK copied to: ${finalApkPath}`);
+            console.log(`🚀 Ready to install: ${finalApkName}`);
+            
+            // Also copy to app root for backwards compatibility
+            const appRootApkPath = path.join(appDir, finalApkName);
+            fs.copyFileSync(apkPath, appRootApkPath);
+            console.log(`📁 APK also available in app folder: ${appRootApkPath}`);
           } catch (copyError) {
-            console.log('⚠️  Could not copy APK to app root:', copyError.message);
+            console.log('⚠️  Could not copy APK:', copyError.message);
             console.log(`📱 APK available at: ${apkPath}`);
           }
         } else {
