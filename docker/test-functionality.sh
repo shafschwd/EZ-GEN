@@ -40,9 +40,9 @@ fi
 
 # Test 2: Check API health
 print_info "Test 2: Testing API health endpoint..."
-if curl -s -f http://localhost:3000/api/health > /dev/null; then
+if curl -s -f http://localhost:5005/api/health > /dev/null; then
     print_success "API health endpoint is responding"
-    API_RESPONSE=$(curl -s http://localhost:3000/api/health)
+    API_RESPONSE=$(curl -s http://localhost:5005/api/health)
     echo "    Response: $API_RESPONSE"
 else
     print_error "API health endpoint is not responding"
@@ -65,7 +65,7 @@ TEST_DATA='{"appName":"TestApp","websiteUrl":"https://example.com","packageName"
 RESPONSE=$(curl -s -X POST \
   -H "Content-Type: application/json" \
   -d "$TEST_DATA" \
-  http://localhost:3000/api/generate-app \
+    http://localhost:5005/api/generate-app \
   -w "%{http_code}")
 
 HTTP_CODE=$(echo "$RESPONSE" | tail -c 4)
@@ -129,7 +129,7 @@ echo ""
 print_success "🎉 Docker functionality tests completed!"
 echo ""
 print_info "Next steps:"
-echo "  1. Open http://localhost:3000 in your browser"
+echo "  1. Open http://localhost:5005 in your browser"
 echo "  2. Try generating a test app"
 echo "  3. Check logs with: docker logs -f ez-gen-app"
 echo "  4. Access container shell with: docker exec -it ez-gen-app bash"

@@ -104,7 +104,7 @@ run_tests() {
     
     # Test 4: Test container startup
     print_info "Test 4: Testing container startup..."
-    if docker run -d --name ez-gen-test -p 3001:3000 ez-gen:test; then
+    if docker run -d --name ez-gen-test -p 3001:5005 ez-gen:test; then
         print_success "Container started successfully"
         
         # Wait for container to be ready
@@ -150,7 +150,7 @@ run_tests() {
         sleep 20
         
         # Check if service is up
-        if curl -f http://localhost:3000 >/dev/null 2>&1; then
+    if curl -f http://localhost:5005 >/dev/null 2>&1; then
             print_success "Docker-compose service is healthy"
         else
             print_warning "Docker-compose service not responding, checking logs..."
@@ -173,7 +173,7 @@ run_tests() {
     echo "  cd docker && ./test-docker.sh start"
     echo ""
     print_info "To access the application:"
-    echo "  http://localhost:3000"
+    echo "  http://localhost:5005"
 }
 
 # Function to build Docker image
@@ -195,18 +195,18 @@ run_container() {
     print_info "Starting EZ-GEN container..."
     docker run -d \
         --name ez-gen-app \
-        -p 3000:3000 \
+    -p 5005:5005 \
         -v "$(pwd)/../generated-apps:/app/generated-apps" \
         -v "$(pwd)/../uploads:/app/uploads" \
         ez-gen:latest
-    print_success "Container started! Access at http://localhost:3000"
+    print_success "Container started! Access at http://localhost:5005"
 }
 
 # Function to start with docker-compose
 start_compose() {
     print_info "Starting EZ-GEN with docker-compose..."
     docker-compose up -d
-    print_success "EZ-GEN started! Access at http://localhost:3000"
+    print_success "EZ-GEN started! Access at http://localhost:5005"
     echo ""
     print_info "Useful commands:"
     echo "  docker-compose logs -f    # View logs"
@@ -221,7 +221,7 @@ start_prod_compose() {
     print_success "EZ-GEN production started!"
     echo ""
     print_info "Services:"
-    echo "  EZ-GEN App: http://localhost:3000"
+    echo "  EZ-GEN App: http://localhost:5005"
     echo "  Nginx Proxy: http://localhost:80"
     echo ""
     print_info "Useful commands:"
@@ -317,10 +317,10 @@ show_status() {
     fi
     
     # Check if accessible
-    if curl -s http://localhost:3000 >/dev/null 2>&1; then
-        print_success "EZ-GEN is accessible at http://localhost:3000"
+    if curl -s http://localhost:5005 >/dev/null 2>&1; then
+        print_success "EZ-GEN is accessible at http://localhost:5005"
     else
-        print_warning "EZ-GEN is not accessible at http://localhost:3000"
+        print_warning "EZ-GEN is not accessible at http://localhost:5005"
     fi
 }
 
@@ -337,10 +337,10 @@ check_health() {
         print_info "Health Status: $HEALTH_STATUS"
         
         # Check if port is responding
-        if curl -s http://localhost:3000 >/dev/null 2>&1; then
-            print_success "Application is responding on port 3000"
+    if curl -s http://localhost:5005 >/dev/null 2>&1; then
+            print_success "Application is responding on port 5005"
         else
-            print_warning "Application is not responding on port 3000"
+            print_warning "Application is not responding on port 5005"
         fi
         
         # Show recent logs

@@ -53,7 +53,7 @@ git pull
 #### Starting Development:
 1. Open WSL terminal
 2. `cd ~/EZ-GEN`
-3. `npm start` - starts the server on http://localhost:3000
+3. `npm start` - starts the server on http://localhost:5005
 
 #### Making Changes:
 1. Edit files in VS Code (Windows side)
@@ -100,6 +100,6 @@ echo 'export ANDROID_HOME=~/Android/Sdk' >> ~/.bashrc
 1. **Add SSH key to GitHub** (see above)
 2. **Push code**: `cd ~/EZ-GEN && git push -u origin main`
 3. **Start developing**: `npm start`
-4. **Test app generation** at http://localhost:3000
+4. **Test app generation** at http://localhost:5005
 
 You're all set for cross-platform development! 🚀

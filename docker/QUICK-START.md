@@ -43,8 +43,8 @@ docker-manage.bat start-prod
 ```
 
 ### 3. Access the Application
-- **Development**: http://localhost:3000
-- **Production**: http://localhost:3000 (app) + http://localhost:80 (proxy)
+- **Development**: http://localhost:5005
+- **Production**: http://localhost:5005 (app) + http://localhost:80 (proxy)
 
 ## 🔧 Management Commands
 
@@ -113,8 +113,8 @@ sudo systemctl start docker
 # Stop existing containers
 ./test-docker.sh stop
 
-# Or check what's using port 3000
-netstat -an | grep 3000
+# Or check what's using port 5005
+netstat -an | grep 5005
 ```
 
 #### Build Failures
@@ -188,7 +188,7 @@ This includes:
 Set these in your production environment:
 ```bash
 export NODE_ENV=production
-export PORT=3000
+export PORT=5005
 export ANDROID_HOME=/opt/android-sdk
 export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
 ```

@@ -80,12 +80,12 @@ RUN useradd -m -s /bin/bash ezgen \
 # Switch to non-root user
 USER ezgen
 
-# Expose port 3000
-EXPOSE 3000
+# Expose port 5005
+EXPOSE 5005
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:3000 || exit 1
+    CMD curl -f http://localhost:5005 || exit 1
 
 # Start the application
 CMD ["npm", "start"]

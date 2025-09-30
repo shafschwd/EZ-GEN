@@ -40,7 +40,7 @@ A white-label app generator that creates native Android/iOS apps from any websit
    ```
 
 4. **Open in browser:**
-   Navigate to `http://localhost:3000`
+   Navigate to `http://localhost:5005`
 
 ## � Docker Deployment (Recommended)
 

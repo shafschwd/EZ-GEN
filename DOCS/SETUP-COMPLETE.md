@@ -46,7 +46,7 @@ cd ~/EZ-GEN
 # Start server
 npm start
 
-# Open browser to: http://localhost:3000
+# Open browser to: http://localhost:5005
 ```
 
 ## 📋 **Available Commands**
@@ -63,7 +63,7 @@ git add . && git commit -m "msg" && git push  # Save and push changes
 1. **Edit files**: Use VS Code on Windows side
 2. **Test server**: Run `npm start` in WSL
 3. **Version control**: Use git commands in WSL
-4. **Generate apps**: Use web interface at http://localhost:3000
+4. **Generate apps**: Use web interface at http://localhost:5005
 
 ## 📁 **Project Structure**
 ```

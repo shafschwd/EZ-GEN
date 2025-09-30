@@ -21,7 +21,7 @@ cd docker
 ./test-docker.sh start
 ```
 
-Access EZ-GEN at: http://localhost:3000
+Access EZ-GEN at: http://localhost:5005
 
 ## 📁 Files
 
@@ -108,7 +108,7 @@ The test script runs a comprehensive suite:
 ## 🔧 Configuration
 
 ### Ports
-- **3000** - Main EZ-GEN application (mapped to host)
+- **5005** - Main EZ-GEN application (mapped to host)
 
 ### Volumes
 - **`../generated-apps`** - Generated mobile apps persist on host
@@ -116,7 +116,7 @@ The test script runs a comprehensive suite:
 
 ### Environment
 - **NODE_ENV** - Production mode
-- **PORT** - 3000 (internal)
+- **PORT** - 5005 (internal)
 - **ANDROID_HOME** - Android SDK path
 - **JAVA_HOME** - Java installation path
 
@@ -139,8 +139,8 @@ The test script runs a comprehensive suite:
 # Stop existing containers
 ./test-docker.sh stop
 
-# Check what's using port 3000
-lsof -i :3000
+# Check what's using port 5005
+lsof -i :5005
 ```
 
 ### Build Failures

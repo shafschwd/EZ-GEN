@@ -4,7 +4,7 @@ Your EZ-GEN Docker container is now **running successfully**! Here's how to test
 
 ## ✅ Current Status
 - 🐳 **Container**: Running and healthy
-- 🌐 **Website**: Available at http://localhost:3000
+- 🌐 **Website**: Available at http://localhost:5005
 - 📊 **API**: Responding correctly
 - 💾 **Volumes**: All mounted properly
 - 🔧 **Android SDK**: Installed and configured
@@ -12,7 +12,7 @@ Your EZ-GEN Docker container is now **running successfully**! Here's how to test
 ## 🧪 Test the Application
 
 ### 1. Open the Website
-Navigate to: **http://localhost:3000**
+Navigate to: **http://localhost:5005**
 
 ### 2. Generate a Test App
 Try creating an app with these sample values:
@@ -111,7 +111,7 @@ docker-manage.bat start
 
 ## 🎯 What to Test
 
-1. **Website loads** at http://localhost:3000
+1. **Website loads** at http://localhost:5005
 2. **App generation** with a real website URL
 3. **Download** the generated app
 4. **Check APK generation** (if you have Android Studio)

@@ -9,7 +9,7 @@ async function testPlayStoreGeneration() {
 
   try {
     console.log('Sending request to generate app...');
-    const response = await fetch('http://localhost:3000/api/generate-app', {
+  const response = await fetch('http://localhost:5005/api/generate-app', {
       method: 'POST',
       body: form
     });
@@ -27,7 +27,7 @@ async function testPlayStoreGeneration() {
       
       // Try to download AAB (Play Store build)
       console.log('Attempting to download AAB...');
-      const aabResponse = await fetch(`http://localhost:3000/api/download-aab/${result.appId}`);
+  const aabResponse = await fetch(`http://localhost:5005/api/download-aab/${result.appId}`);
       
       if (aabResponse.ok) {
         console.log('✅ AAB download available!');
@@ -37,7 +37,7 @@ async function testPlayStoreGeneration() {
       
       // Try to download APK
       console.log('Attempting to download APK...');
-      const apkResponse = await fetch(`http://localhost:3000/api/download-apk/${result.appId}`);
+  const apkResponse = await fetch(`http://localhost:5005/api/download-apk/${result.appId}`);
       
       if (apkResponse.ok) {
         console.log('✅ APK download available!');

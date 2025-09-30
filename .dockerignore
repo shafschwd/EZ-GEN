@@ -1,0 +1,25 @@
+# Ignore git metadata
+.git
+
+# Ignore node_modules and npm/yarn artifacts
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Ignore generated apps and build artifacts
+generated-apps
+uploads
+apks
+
+# Ignore IDE and system files
+.vscode
+*.log
+*.tmp
+
+# Ignore Android/Gradle build outputs in templates and generated apps
+**/android/app/build
+**/android/**/build
+
+# Ignore other large files
+*.tar.gz
+*.zip

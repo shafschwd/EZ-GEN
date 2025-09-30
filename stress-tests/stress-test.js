@@ -14,7 +14,7 @@ const { performance } = require('perf_hooks');
 
 // Test configuration
 const CONFIG = {
-  baseUrl: 'http://localhost:3000',
+  baseUrl: 'http://localhost:5005',
   maxConcurrentUsers: 10,
   testDuration: 60000, // 1 minute
   delayBetweenRequests: 1000, // 1 second
@@ -605,7 +605,7 @@ Usage: node stress-test.js [options]
 Options:
   --users <number>      Number of concurrent users (default: 10)
   --duration <seconds>  Test duration in seconds (default: 60)
-  --url <url>          Server URL (default: http://localhost:3000)
+  --url <url>          Server URL (default: http://localhost:5005)
   --delay <ms>         Delay between requests (default: 1000)
   --log-level <level>  Log level: DEBUG, INFO, WARN, ERROR (default: INFO)
   --output <dir>       Output directory (default: ./results)
@@ -613,7 +613,7 @@ Options:
 
 Examples:
   node stress-test.js --users 20 --duration 120
-  node stress-test.js --url http://localhost:3000 --log-level DEBUG
+  node stress-test.js --url http://localhost:5005 --log-level DEBUG
   node stress-test.js --users 5 --duration 30 --delay 500
     `);
     return;

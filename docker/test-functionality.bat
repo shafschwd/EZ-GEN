@@ -19,10 +19,10 @@ echo.
 
 REM Test 2: Check API health
 echo ℹ️ Test 2: Testing API health endpoint...
-curl -s -f http://localhost:3000/api/health >nul 2>&1
+curl -s -f http://localhost:5005/api/health >nul 2>&1
 if %errorlevel% equ 0 (
     echo ✅ API health endpoint is responding
-    for /f "delims=" %%i in ('curl -s http://localhost:3000/api/health') do echo     Response: %%i
+    for /f "delims=" %%i in ('curl -s http://localhost:5005/api/health') do echo     Response: %%i
 ) else (
     echo ❌ API health endpoint is not responding
     pause
@@ -94,7 +94,7 @@ echo.
 echo ✅ 🎉 Docker functionality tests completed!
 echo.
 echo ℹ️ Next steps:
-echo   1. Open http://localhost:3000 in your browser
+echo   1. Open http://localhost:5005 in your browser
 echo   2. Try generating a test app
 echo   3. Check logs with: docker logs -f ez-gen-app
 echo   4. Access container shell with: docker exec -it ez-gen-app bash

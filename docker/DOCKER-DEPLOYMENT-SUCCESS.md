@@ -5,8 +5,8 @@
 Your EZ-GEN App Generator is now successfully running in Docker! 
 
 ## 🚀 Quick Access
-- **Web Interface**: http://localhost:3000
-- **API Health Check**: http://localhost:3000/api/health
+- **Web Interface**: http://localhost:5005
+- **API Health Check**: http://localhost:5005/api/health
 
 ## 📊 System Status
 
@@ -14,7 +14,7 @@ Your EZ-GEN App Generator is now successfully running in Docker!
 ```
 ✅ Container Name: ez-gen-app
 ✅ Status: Running and healthy
-✅ Port Mapping: 3000:3000 (Host:Container)
+✅ Port Mapping: 5005:5005 (Host:Container)
 ✅ Base Image: Ubuntu 22.04 LTS
 ✅ User: ezgen (non-root for security)
 ```
@@ -79,7 +79,7 @@ docker-compose -f docker/docker-compose.yml down
 ```
 
 ### 2. Manual Web Interface Test
-1. Open http://localhost:3000 in your browser
+1. Open http://localhost:5005 in your browser
 2. Enter a website URL (e.g., https://example.com)
 3. Fill in app details
 4. Click "Generate App"
@@ -88,7 +88,7 @@ docker-compose -f docker/docker-compose.yml down
 ### 3. API Test
 ```powershell
 # Test health endpoint
-curl http://localhost:3000/api/health
+curl http://localhost:5005/api/health
 
 # Expected response:
 # {"status":"OK","message":"EZ-GEN App Generator is running!"}
@@ -123,8 +123,8 @@ docker-compose -f docker/docker-compose.yml restart
 
 ### Port Already in Use
 ```powershell
-# Check what's using port 3000
-netstat -ano | findstr :3000
+# Check what's using port 5005
+netstat -ano | findstr :5005
 
 # Kill the process or change port in docker-compose.yml
 ```

@@ -20,7 +20,7 @@ echo "2. Run a quick stress test"
 echo "3. Show results"
 
 # Check if server is running
-if curl -s http://localhost:3000 > /dev/null 2>&1; then
+if curl -s http://localhost:5005 > /dev/null 2>&1; then
     echo -e "\n${GREEN}✅ EZ-GEN server is already running!${NC}"
 else
     echo -e "\n${YELLOW}⚠️  EZ-GEN server is not running.${NC}"
@@ -36,7 +36,7 @@ else
 fi
 
 # Verify server is now running
-if ! curl -s http://localhost:3000 > /dev/null 2>&1; then
+if ! curl -s http://localhost:5005 > /dev/null 2>&1; then
     echo -e "${RED}❌ Server is still not accessible. Please check and try again.${NC}"
     exit 1
 fi

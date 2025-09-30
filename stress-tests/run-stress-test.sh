@@ -17,8 +17,8 @@ echo "======================================"
 
 # Check if EZ-GEN server is running
 echo -e "\n${BLUE}🔍 Checking if EZ-GEN server is running...${NC}"
-if curl -s http://localhost:3000 > /dev/null 2>&1; then
-    echo -e "${GREEN}✅ EZ-GEN server is running at http://localhost:3000${NC}"
+if curl -s http://localhost:5005 > /dev/null 2>&1; then
+    echo -e "${GREEN}✅ EZ-GEN server is running at http://localhost:5005${NC}"
 else
     echo -e "${RED}❌ EZ-GEN server is not running!${NC}"
     echo -e "${YELLOW}Please start the server first:${NC}"

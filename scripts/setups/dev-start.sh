@@ -1,7 +1,7 @@
 #!/bin/bash
 echo '🚀 Starting EZ-GEN Development Server...'
 echo '📍 Project: ~/EZ-GEN'
-echo '🌐 URL: http://localhost:3000'
+echo '🌐 URL: http://localhost:5005'
 echo ''
 
 # Set up SSH agent for git

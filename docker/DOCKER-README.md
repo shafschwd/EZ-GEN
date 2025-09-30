@@ -13,7 +13,7 @@ cd ez-gen
 docker-compose up -d
 
 # Access the application
-open http://localhost:3000
+open http://localhost:5005
 ```
 
 ### **Option 2: Manual Docker Build**
@@ -25,13 +25,13 @@ docker build -t ez-gen:latest .
 # Run the container
 docker run -d \
   --name ez-gen-app \
-  -p 3000:3000 \
+  -p 5005:5005 \
   -v $(pwd)/generated-apps:/app/generated-apps \
   -v $(pwd)/uploads:/app/uploads \
   ez-gen:latest
 
 # Access the application
-open http://localhost:3000
+open http://localhost:5005
 ```
 
 ## 📦 **What's Included in the Docker Image**
@@ -96,7 +96,7 @@ services:
     build: .
     container_name: ez-gen-app
     ports:
-      - "3000"
+      - "5005"
     volumes:
       - ./generated-apps:/app/generated-apps
     restart: unless-stopped
@@ -121,9 +121,9 @@ services:
 ```bash
 docker run -d \
   --name ez-gen-app \
-  -p 3000:3000 \
+  -p 5005:5005 \
   -e NODE_ENV=production \
-  -e PORT=3000 \
+  -e PORT=5005 \
   -e JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 \
   -e ANDROID_SDK_ROOT=/opt/android-sdk \
   -v $(pwd)/generated-apps:/app/generated-apps \
@@ -141,7 +141,7 @@ docker run -d \
   --name ez-gen-app \
   --memory=4g \
   --cpus=2 \
-  -p 3000:3000 \
+  -p 5005:5005 \
   ez-gen:latest
 ```
 
@@ -166,7 +166,7 @@ docker ps
 docker inspect ez-gen-app | grep Health
 
 # Manual health check
-curl http://localhost:3000/health
+curl http://localhost:5005/health
 ```
 
 ### **Resource Usage:**
@@ -184,11 +184,11 @@ docker inspect ez-gen-app
 
 #### **1. Port Already in Use**
 ```bash
-# Check what's using port 3000
-lsof -i :3000
+# Check what's using port 5005
+lsof -i :5005
 
 # Use different port
-docker run -p 3001:3000 ez-gen:latest
+docker run -p 3001:5005 ez-gen:latest
 ```
 
 #### **2. Permission Issues**
@@ -267,7 +267,7 @@ services:
   ez-gen:
     build: .
     ports:
-      - "3000-3005:3000"
+      - "5005-5010:5005"
     deploy:
       replicas: 3
     volumes:
@@ -317,7 +317,7 @@ docker run -d \
 
 ```bash
 # Build and run
-docker build -t ez-gen . && docker run -p 3000:3000 ez-gen
+docker build -t ez-gen . && docker run -p 5005:5005 ez-gen
 
 # Quick start with compose
 docker-compose up -d

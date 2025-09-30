@@ -90,7 +90,7 @@ goto :end
 echo 🚀 Starting EZ-GEN with docker-compose...
 docker-compose up -d
 if %errorlevel% equ 0 (
-    echo ✅ EZ-GEN started! Access at http://localhost:3000
+    echo ✅ EZ-GEN started! Access at http://localhost:5005
     echo.
     echo Useful commands:
     echo   docker-compose logs -f    # View logs
@@ -108,7 +108,7 @@ if %errorlevel% equ 0 (
     echo ✅ EZ-GEN production started!
     echo.
     echo Services:
-    echo   EZ-GEN App: http://localhost:3000
+    echo   EZ-GEN App: http://localhost:5005
     echo   Nginx Proxy: http://localhost:80
 ) else (
     echo ❌ Failed to start production compose
@@ -159,11 +159,11 @@ echo.
 echo 🐳 Containers:
 docker ps -a | findstr "CONTAINER ez-gen" 2>nul || echo   No EZ-GEN containers found
 echo.
-curl -s http://localhost:3000 >nul 2>&1
+curl -s http://localhost:5005 >nul 2>&1
 if %errorlevel% equ 0 (
-    echo ✅ EZ-GEN is accessible at http://localhost:3000
+    echo ✅ EZ-GEN is accessible at http://localhost:5005
 ) else (
-    echo ⚠️ EZ-GEN is not accessible at http://localhost:3000
+    echo ⚠️ EZ-GEN is not accessible at http://localhost:5005
 )
 goto :end
 

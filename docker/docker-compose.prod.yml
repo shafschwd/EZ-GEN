@@ -7,14 +7,14 @@ services:
       dockerfile: docker/Dockerfile.prod
     container_name: ez-gen-prod
     ports:
-      - "3000:3000"
+      - "5005:5005"
     volumes:
       - ../generated-apps:/app/generated-apps
       - ../uploads:/app/uploads
       - ../apks:/app/apks
     environment:
       - NODE_ENV=production
-      - PORT=3000
+      - PORT=5005
     restart: unless-stopped
     deploy:
       resources:
@@ -25,7 +25,7 @@ services:
           memory: 2G
           cpus: '1.0'
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test: ["CMD", "curl", "-f", "http://localhost:5005"]
       interval: 30s
       timeout: 10s
       retries: 3

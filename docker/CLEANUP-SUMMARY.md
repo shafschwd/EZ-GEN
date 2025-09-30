@@ -68,7 +68,7 @@ cd docker
 cd docker
 ./test-docker.sh build-prod    # Optimized build
 ./test-docker.sh start-prod    # Full production stack
-# Access: http://localhost:3000 (app) or http://localhost:80 (nginx)
+# Access: http://localhost:5005 (app) or http://localhost:80 (nginx)
 ```
 
 ## 📊 **File Comparison:**

@@ -111,7 +111,7 @@ cd stress-tests
 ```bash
 --users <number>      # Concurrent users (default: 10)
 --duration <seconds>  # Test duration (default: 60)
---url <url>          # Server URL (default: http://localhost:3000)
+--url <url>          # Server URL (default: http://localhost:5005)
 --delay <ms>         # Delay between requests (default: 1000)
 --log-level <level>  # DEBUG, INFO, WARN, ERROR (default: INFO)
 --output <dir>       # Output directory (default: ./results)
@@ -250,7 +250,7 @@ const CONFIG = {
 ### **Check Server Response**
 ```bash
 # Manual test
-curl -X POST http://localhost:3000/generate \
+curl -X POST http://localhost:5005/generate \
   -F "appName=TestApp" \
   -F "websiteUrl=https://example.com" \
   -F "packageName=com.test.app"

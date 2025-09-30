@@ -100,11 +100,11 @@ RUN mkdir -p uploads generated-apps \
 USER ezgen
 
 # Expose port
-EXPOSE 3000
+EXPOSE 5005
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:3000 || exit 1
+    CMD curl -f http://localhost:5005 || exit 1
 
 # Start application
 CMD ["node", "server.js"]
